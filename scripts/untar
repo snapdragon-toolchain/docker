@@ -1,0 +1,24 @@
+#!/bin/bash
+#
+
+[ -r $TOOLCHAIN_ROOT/env.sh ] && source $TOOLCHAIN_ROOT/env.sh
+
+# Expand vars in the arguments after loading the env
+eval src=$1
+eval dst=$2
+
+tmp_dir=/tmp/$name-untar
+
+mkdir -p $tmp_dir/out
+
+# Untar into the 'out' directory
+tar -xavf $src -C $tmp_dir/out
+
+# Sanitize untared dir
+chown -R root.root $tmp_dir/out
+chmod -R a=rX $tmp_dir/out
+
+# Move contents into destination
+mkdir -p $dst && cp -rf $tmp_dir/out/* $dst
+
+rm -rf $tmp_dir
