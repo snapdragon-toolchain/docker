@@ -41,30 +41,23 @@ RUN /bin/fetch-and-unzip android-ndk https://dl.google.com/android/repository/an
 # Install Hexagon SDK
 RUN /bin/fetch-and-untar hexagon-sdk https://github.com/snapdragon-toolchain/hexagon-sdk/releases/download/v6.3.0/hexagon-sdk-v6.3.0-amd64-lnx.tar.xz /opt/hexagon
 
-# Install OpenCL headers
-RUN /bin/fetch-and-untar opencl-headers https://github.com/KhronosGroup/OpenCL-Headers/archive/refs/tags/v2023.12.14.tar.gz /tmp/opencl \
-    && cp -r /tmp/opencl/OpenCL-Headers-2023.12.14/CL /usr/local/include \
-    && cp -r /tmp/opencl/OpenCL-Headers-2023.12.14/CL ${ANDROID_NDK_ROOT}/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include \
-    && rm -rf /tmp/opencl
-
-# Install OpenCL hpp
-RUN /bin/fetch-and-untar opencl-clhpp https://github.com/KhronosGroup/OpenCL-CLHPP/archive/refs/tags/v2023.12.14.tar.gz /tmp/opencl \
-    && cp /tmp/opencl/OpenCL-CLHPP-2023.12.14/include/CL/* /usr/local/include/CL \
-    && cp /tmp/opencl/OpenCL-CLHPP-2023.12.14/include/CL/* ${ANDROID_NDK_ROOT}/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include/CL \
-    && rm -rf /tmp/opencl
-
-# Install OpenCL ICD
-RUN /bin/fetch-and-untar opencl-icd-loader https://github.com/KhronosGroup/OpenCL-ICD-Loader/archive/refs/tags/v2023.12.14.tar.gz /tmp/opencl \
-    && cd /tmp/opencl/OpenCL-ICD-Loader-2023.12.14 \
-    && mkdir build_ndk && cd build_ndk \
-    && cmake .. -G Ninja -DCMAKE_BUILD_TYPE=Release \
+# Install OpenCL SDK
+ENV OPENCL_REL="2025.07.22"
+ENV OPENCL_URL="https://github.com/KhronosGroup/OpenCL"
+RUN    /bin/fetch-and-untar opencl-headers    ${OPENCL_URL}-Headers/archive/refs/tags/v${OPENCL_REL}.tar.gz    /tmp/opencl \
+    && /bin/fetch-and-untar opencl-clhpp      ${OPENCL_URL}-CLHPP/archive/refs/tags/v${OPENCL_REL}.tar.gz      /tmp/opencl \
+    && /bin/fetch-and-untar opencl-icd-loader ${OPENCL_URL}-ICD-Loader/archive/refs/tags/v${OPENCL_REL}.tar.gz /tmp/opencl \
+    && cp -r /tmp/opencl/OpenCL-Headers-${OPENCL_REL}/CL ${ANDROID_NDK_ROOT}/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include \
+    && cp -r /tmp/opencl/OpenCL-CLHPP-${OPENCL_REL}/include/CL/* ${ANDROID_NDK_ROOT}/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include/CL \
+    && cd /tmp/opencl/OpenCL-ICD-Loader-${OPENCL_REL} \
+    && cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Release \
     -DCMAKE_TOOLCHAIN_FILE=${ANDROID_NDK_ROOT}/build/cmake/android.toolchain.cmake \
     -DOPENCL_ICD_LOADER_HEADERS_DIR=${ANDROID_NDK_ROOT}/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include \
-    -DANDROID_ABI=arm64-v8a \
-    -DANDROID_PLATFORM=31 \
+    -DANDROID_ABI=arm64-v8a  \
+    -DANDROID_PLATFORM=31    \
     -DANDROID_STL=c++_shared \
-    && ninja \
-    && cp libOpenCL.so ${ANDROID_NDK_ROOT}/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/lib/aarch64-linux-android \
+    && cmake --build build   \
+    && cp build/libOpenCL.so ${ANDROID_NDK_ROOT}/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/lib/aarch64-linux-android \
     && rm -rf /tmp/opencl
 
 # Final ARM64 Android image
