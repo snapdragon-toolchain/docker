@@ -7,7 +7,7 @@ ENV DEBIAN_FRONTEND=noninteractive
 
 ENV ANDROID_NDK_ROOT="/opt/android-ndk-r28b"
 
-ENV HEXAGON_SDK_ROOT="/opt/hexagon/6.3.0.0"
+ENV HEXAGON_SDK_ROOT="/opt/hexagon/6.4.0.2"
 ENV HEXAGON_TOOLS_ROOT="${HEXAGON_SDK_ROOT}/tools/HEXAGON_Tools/19.0.04"
 ENV DEFAULT_HLOS_ARCH="64"
 ENV DEFAULT_TOOLS_VARIANT="toolv19"
@@ -39,7 +39,7 @@ ENV SHELL="/bin/bash"
 RUN /bin/fetch-and-unzip android-ndk https://dl.google.com/android/repository/android-ndk-r28b-linux.zip /opt
 
 # Install Hexagon SDK
-RUN /bin/fetch-and-untar hexagon-sdk https://github.com/snapdragon-toolchain/hexagon-sdk/releases/download/v6.3.0/hexagon-sdk-v6.3.0-amd64-lnx.tar.xz /opt/hexagon
+RUN /bin/fetch-and-untar hexagon-sdk https://github.com/snapdragon-toolchain/hexagon-sdk/releases/download/v6.4.0.2/hexagon-sdk-v6.4.0.2-amd64-lnx.tar.xz /opt/hexagon
 
 # Install OpenCL SDK
 ENV OPENCL_REL="2025.07.22"
